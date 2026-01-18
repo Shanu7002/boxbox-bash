@@ -53,7 +53,7 @@ function generateRandomPlayer() {
     randomNames[getRandomInt(randomNames.length)] +
     randomSuffixes[getRandomInt(randomSuffixes.length)];
   const rank = ranks[getRandomInt(ranks.length)];
-  const tier = getRandomInt(4);
+  const tier = getRandomInt(4, 1);
   const lp = maxLP(rank);
   const games = getRandomInt(100);
   const gold = getRandomInt(30);
