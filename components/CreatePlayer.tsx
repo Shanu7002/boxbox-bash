@@ -50,13 +50,13 @@ const randomSuffixes = [
 
 function generateRandomPlayer() {
   const name =
-    randomNames[Math.floor(Math.random() * randomNames.length)] +
-    randomSuffixes[Math.floor(Math.random() * randomSuffixes.length)];
-  const rank = ranks[Math.floor(Math.random() * ranks.length)];
-  const tier = Math.floor(Math.random() * 4) + 1;
-  const lp = Math.floor(Math.random() * 500);
-  const games = Math.floor(Math.random() * 200) + 10;
-  const gold = Math.floor(Math.random() * 30);
+    randomNames[getRandomInt(randomNames.length)] +
+    randomSuffixes[getRandomInt(randomSuffixes.length)];
+  const rank = ranks[getRandomInt(ranks.length)];
+  const tier = getRandomInt(4);
+  const lp = maxLP(rank);
+  const games = getRandomInt(100);
+  const gold = getRandomInt(30);
   const avatarSeed = crypto.randomUUID();
 
   return { name, rank, tier, lp, games, gold, avatarSeed };
@@ -87,4 +87,25 @@ export function CreatePlayer() {
       <UserRoundPlus className='w-7 h-7' />
     </Button>
   );
+}
+
+// utils
+
+function getRandomInt(max: number, min: number = 0): number {
+  // returns a random integer where min <= integer <= max (min its optional with default 0)
+  return Math.floor(Math.random() * (max - min)) + min; 
+}
+
+// just check the rank, we dont wanna see an iron IV player with 500lp lmao
+function maxLP(rank: string): number {
+  switch (rank) {
+  case "master":
+    return getRandomInt(400); // min: 0, max: 400
+  case "grandmaster":
+    return getRandomInt(800, 400); // min: 400, max: 800
+  case "challenger":
+    return getRandomInt(1200, 800); // min: 800, max: 1200
+  default:
+    return getRandomInt(99); // min: 0, max 99
+  }
 }
