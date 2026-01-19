@@ -20,16 +20,14 @@ function isValidPlayer(player: unknown): player is IPlayer {
   if (typeof player !== 'object' || player === null) return false;
   const p = player as Record<string, unknown>;
   return (
-    typeof p.id === 'string' &&
-    typeof p.name === 'string' &&
-    typeof p.gold === 'number' &&
-    typeof p.games === 'number' &&
-    typeof p.rank === 'string' &&
-    VALID_RANKS.includes(p.rank) &&
-    (p.tier === undefined ||
-      (typeof p.tier === 'number' && p.tier >= 1 && p.tier <= 4)) &&
-    typeof p.lp === 'number' &&
-    typeof p.avatarSeed === 'string'
+    isString(p.id) &&
+    isString(p.name) &&
+    isNumber(p.gold) &&
+    isNumber(p.games) &&
+    isString(p.rank) &&  VALID_RANKS.includes(p.rank) &&
+    (p.tier === undefined || (isNumber(p.tier) && p.tier >= 1 && p.tier <= 4)) &&
+    isNumber(p.lp) &&
+    isString(p.avatarSeed)
   );
 }
 
@@ -59,18 +57,32 @@ function isValidGeneralNotes(generalNotes: unknown): generalNotes is INote[] {
   return Array.isArray(generalNotes) && generalNotes.every(isValidNote);
 }
 
-function isValidTeam(team: unknown): team is ITeam {
-  if (typeof team !== 'object' || team === null) return false;
-  const t = team as Record<string, unknown>;
-  if (typeof t.id !== 'string' || typeof t.name !== 'string') return false;
-  if (!Array.isArray(t.members)) return false;
-  return t.members.every((member: unknown) => {
-    if (typeof member !== 'object' || member === null) return false;
-    const m = member as Record<string, unknown>;
-    return typeof m.playerId === 'string' && typeof m.gold === 'number';
-  });
+// helper type guard for team member
+function isValidTeamMember(member: unknown): member is { playerId: string, gold: number} {
+  if (typeof member !== "object" || member === null) return false;
+
+  return (
+    "playerId" in member && typeof member.playerId === "string" &&
+    "gold" in member && typeof member.gold === "number"
+  )
 }
 
+// type guard ITeam
+function isValidTeam(team: unknown): team is ITeam {
+  if (typeof team !== 'object' || team === null) return false;
+  if(!("id" in team && "name" in team && "members" in team)) return false;
+
+  const t = team as { id: unknown, name: unknown, members: unknown};
+
+  return (
+    typeof t.id === "string" &&
+    typeof t.name === "string" &&
+    Array.isArray(t.members) &&
+    t.members.every(isValidTeamMember)
+  );
+}
+
+// first call with teams array
 function isValidTeams(teams: unknown): teams is ITeam[] {
   return Array.isArray(teams) && teams.every(isValidTeam);
 }
@@ -179,3 +191,8 @@ export const dataTransfer = {
     }
   },
 };
+
+// utils
+
+const isString = (v: unknown): v is string => typeof v === 'string';
+const isNumber = (v: unknown): v is number => typeof v === 'number';
